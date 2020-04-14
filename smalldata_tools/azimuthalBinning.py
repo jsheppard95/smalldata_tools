@@ -36,49 +36,70 @@ class azimuthalBinning(DetObjectFunc):
         userMask = userMask as array (detector data shaped)
         """
         # save parameters for later use
-        self._name = kwargs.get('name','azav')
+        self._name = kwargs.get('name', 'azav')
         super(azimuthalBinning, self).__init__(**kwargs)
-        self._mask = kwargs.pop("userMask",None)
-        self.gainImg = kwargs.pop("gainImg",None)
-        self.darkImg = kwargs.pop("darkImg",None)
-        self._debug = kwargs.pop("debug",False)
-        self.ADU_per_photon = kwargs.pop("ADU_per_Photon",1.)
-        self.dis_to_sam = kwargs.pop("dis_to_sam",100e-3)
-        self.eBeam =  kwargs.pop("eBeam",9.5)
-        self.lam = util.E2lam(self.eBeam)*1e10
-        self.phiBins = kwargs.pop("phiBins",1)
-        self.Pplane = kwargs.pop("Pplane",0)
-        self.tx = kwargs.pop("tx",0.)
-        self.ty = kwargs.pop("ty",0.)
-        self.qbin = kwargs.pop("qbin",5e-3)
-        self.thresRms =  kwargs.pop("thresRms",None)
-        self.thresADU =  kwargs.pop("thresADU",None)
-        self.thresADUhigh = kwargs.pop("thresADUhigh",None)
-        self.x = kwargs.pop("x",None)
-        self.y = kwargs.pop("y",None)
+        self._mask = kwargs.get("userMask", None)
+        self.gainImg = kwargs.get("gainImg", None)
+        self.darkImg = kwargs.get("darkImg", None)
+        self._debug = kwargs.get("debug", False)
+        self.ADU_per_photon = kwargs.get("ADU_per_Photon", 1.)
+        self.dis_to_sam = kwargs.get("dis_to_sam", 100e-3)
+        self.eBeam =  kwargs.get("eBeam", 9.5)
+        self.lam = util.E2lam(self.eBeam) * 1e10
+        self.phiBins = kwargs.get("phiBins", 1)
+        self.Pplane = kwargs.get("Pplane", 0)
+        self.tx = kwargs.get("tx", 0.)
+        self.ty = kwargs.get("ty", 0.)
+        self.qbin = kwargs.get("qbin", 5e-3)
+        self.thresRms =  kwargs.get("thresRms", None)
+        self.thresADU =  kwargs.get("thresADU", None)
+        self.thresADUhigh = kwargs.get("thresADUhigh", None)
+        self.x = kwargs.get("x", None)
+        self.y = kwargs.get("y", None)
 
-        center = kwargs.pop("center",None)
-        if center is not None:
+        center = kwargs.get("center",None)
+        if center:
             self.xcen = center[0]/1e3
             self.ycen = center[1]/1e3 
         else:
-            print('no center has been given, will return None')
-            return None
+            print('no center has been given')
+            # return None (__init__ is required to return None)
             
-        if self._mask is not None: self._mask = np.asarray(self._mask,dtype=np.bool)
+        if self._mask: 
+            self._mask = np.asarray(self._mask, dtype=np.bool)
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def mask(self):
+        return self._mask
+
+    @property
+    def debug(self):
+        return self._debug
+
+    @debug.setter
+    def debug(self, debug):
+        if not isinstance(debug, bool):
+            print('debug property must be a bool')
+            return
+
+        self._debug = debug
 
     def setFromDet(self, det):
-        if det.mask is not None and det.cmask is not None:
-            if self._mask is not None and self._mask.flatten().shape == det.mask.flatten().shape:
+        if det.mask and det.cmask:
+            if self._mask and self._mask.flatten().shape == det.mask.flatten().shape:
                 self._mask = ~(self._mask.flatten().astype(bool)&det.mask.astype(bool).flatten())
             else:
                 self._mask = ~(det.cmask.astype(bool)&det.mask.astype(bool))
         self._mask = self._mask.flatten()
         #if self._mask is None and det.mask is not None:
         #    setattr(self, '_mask', det.mask.astype(np.uint8))
-        if det.x is not None:
-            self.x = det.x.flatten()/1e3
-            self.y = det.y.flatten()/1e3
+        if det.x and det.y:  # more explicit to have both
+            self.x = det.x.flatten() / 1e3
+            self.y = det.y.flatten() / 1e3
 
     def setFromFunc(self, func=None):
         super(azimuthalBinning,self).setFromFunc()
@@ -86,9 +107,11 @@ class azimuthalBinning(DetObjectFunc):
             self._setup()
             return
         print 'set params from func ', func.__dict__.keys()
-        if func._x is not None: self.x = func._x.flatten()/1e3
-        if func._y is not None: self.y = func._y.flatten()/1e3
-        if func._mask is not None and isinstance(func, ROIFunc): 
+        if func._x: 
+            self.x = func._x.flatten()/1e3
+        if func._y: 
+            self.y = func._y.flatten()/1e3
+        if func._mask and isinstance(func, ROIFunc): 
             self._mask = func._mask.astype(bool).flatten()
         else:
             self._mask = (~(func._mask.astype(bool))).flatten()
@@ -99,7 +122,7 @@ class azimuthalBinning(DetObjectFunc):
     def _setup(self):
 
         if rank==0:
-            if self._mask is not None: 
+            if self._mask: 
                 print('initialize azimuthal binning, mask %d pixel for azimuthal integration'%self._mask.sum())
             else:
                 print('no mask has been passed, will return None')
@@ -237,7 +260,7 @@ class azimuthalBinning(DetObjectFunc):
         self.correction = self.correction.flatten()[self._mask.ravel()==0]
         return 
 
-    def msg(self,s,cr=True):
+    def msg(self, s, cr=True):
         if (self._debug):
             if (cr):
                 print(s)
