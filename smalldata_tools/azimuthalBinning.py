@@ -150,19 +150,19 @@ class azimuthalBinning(DetObjectFunc):
 
     @property
     def x(self):
-        reutrn self._x
+        return self._x
     
     @property
     def y(self):
-        reutrn self._y
+        return self._y
 
     @property
     def xcen(self):
-        reutrn self._xcen
+        return self._xcen
 
     @property
     def ycen(self):
-        reutrn self._ycen
+        return self._ycen
 
     ####### Override methods from DetObjectFunc ########
 
