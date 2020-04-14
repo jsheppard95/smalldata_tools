@@ -122,7 +122,7 @@ class azimuthalBinning(DetObjectFunc):
 
     @property
     def Pplane(self):
-        reutrn self._p_plane
+        return self._p_plane
 
     @property
     def tx(self):
