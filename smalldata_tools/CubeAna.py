@@ -11,7 +11,7 @@ from utilities_plotting import hv_3dimage
 from utilities import E2lam
 from utilities import dictToHdf5
 from utilities import image_from_dxy
-import azimuthalBinning as ab
+import AzimuthalBinning as ab
 import xarray as xr
 from bokeh.io import show
 import holoviews as hv
@@ -267,7 +267,7 @@ class CubeAna(object):
 
         x = self._detConfig[detname]['x']
         y = self._detConfig[detname]['y']
-        self.__dict__[azavName] = ab.azimuthalBinning(x=x.flatten()/1e3,y=y.flatten()/1e3,xcen=center[0]/1e3,ycen=center[1]/1e3,d=dis_to_sam,mask=azavMask.flatten(),lam=E2lam(eBeam)*1e10,Pplane=Pplane,phiBins=phiBins,qbin=qBin,tx=tx, ty=ty)
+        self.__dict__[azavName] = ab.AzimuthalBinning(x=x.flatten()/1e3,y=y.flatten()/1e3,xcen=center[0]/1e3,ycen=center[1]/1e3,d=dis_to_sam,mask=azavMask.flatten(),lam=E2lam(eBeam)*1e10,Pplane=Pplane,phiBins=phiBins,qbin=qBin,tx=tx, ty=ty)
         self.__dict__[azavName+'_q'] = self.__dict__[azavName].q
         self.__dict__[azavName+'_correction'] = self.__dict__[azavName].correction
         self.__dict__[azavName+'_norm'] = self.__dict__[azavName].norm

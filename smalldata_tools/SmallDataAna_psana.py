@@ -35,7 +35,7 @@ from smalldata_tools.utilities_plotting import hv_image_ctl
 from smalldata_tools.utilities_plotting import hv_3dimage
 from smalldata_tools.utilities_FitCenter import FindFitCenter
 from smalldata_tools.utilities_FitCenter import fitCircle
-from smalldata_tools.azimuthalBinning import azimuthalBinning
+from smalldata_tools.AzimuthalBinning import AzimuthalBinning
 from mpi4py import MPI
 import h5py
 comm = MPI.COMM_WORLD
@@ -1435,7 +1435,7 @@ class SmallDataAna_psana(object):
             center=[int(centerString.replace('[','').replace(']','').split(',')[0]),
                     int(centerString.replace('[','').replace(']','').split(',')[1])]
 
-        azav = azimuthalBinning(center=center, dis_to_sam=dis_to_sam,  phiBins=phiBins, eBeam=eBeam, Pplane=Pplane, userMask=userMask, qbins=qBin, tx=tx, ty=ty, name=name)
+        azav = AzimuthalBinning(center=center, dis_to_sam=dis_to_sam,  phiBins=phiBins, eBeam=eBeam, Pplane=Pplane, userMask=userMask, qbins=qBin, tx=tx, ty=ty, name=name)
         getattr(self,detname).addFunc(azav)
 
     def getAzAvs(self,detname=None):
@@ -1443,8 +1443,8 @@ class SmallDataAna_psana(object):
             detname, img, avImage = self.getAvImage(detname=None)   
             if detname is None:
                 return
-        azintArray = [ getattr(getattr(self,detname),key) for key in getattr(self, detname).__dict__.keys() if isinstance(getattr(getattr(self, detname),key), azimuthalBinning) ]
-        azintNames = [ key for key in getattr(self,detname).__dict__.keys() if isinstance(getattr(getattr(self, detname),key), azimuthalBinning) ]
+        azintArray = [ getattr(getattr(self,detname),key) for key in getattr(self, detname).__dict__.keys() if isinstance(getattr(getattr(self, detname),key), AzimuthalBinning) ]
+        azintNames = [ key for key in getattr(self,detname).__dict__.keys() if isinstance(getattr(getattr(self, detname),key), AzimuthalBinning) ]
         return azintNames, azintArray
 
     def AzInt(self, detname=None, use_mask=False, use_mask_local=False, plotIt=False, azintName=None, data=None, imgName=None):

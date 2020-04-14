@@ -2472,7 +2472,7 @@ class SmallDataAna(object):
     def MakeMask(self, detname=None):
         print(' not yet implemented, exists in SmallDataAna_psana.py')
 
-    def azimuthalBinning(self, detname=None):
+    def azimuthal_binning(self, detname=None):
         print(' not yet implemented, exists in SmallDataProduced.py, uses code in xppmodules/src. Not sure if good idea')
 
     ##########################################################################

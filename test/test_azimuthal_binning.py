@@ -1,8 +1,12 @@
 import unittest
 import smalldata_tools.utilities as util
-from smalldata_tools.azimuthalBinning import azimuthalBinning as ab
+import psana
+import numpy as np
+from smalldata_tools.AzimuthalBinning import AzimuthalBinning as ab
 
 # Constants
+
+TEST_RUN = psana.DataSource('exp=XPP:run=320:smd')
 
 # Default values for keyword args
 DFLT_NAME = 'azav'
@@ -52,6 +56,12 @@ class TestAzimuthatlBinning(unittest.TestCase):
         self.assertEqual(azb.y, DFLT_Y)
         self.assertEqual(azb.xcen, DFLT_XCEN)
         self.assertEqual(azb.ycen, DFLT_YCEN)
+
+    def test_azimuthal_averaging(self):
+        mask=np.ones( (2000,2000) )
+        az=azimuthal_averaging(mask,-80,1161,pixelsize=82e-6,d=4.7e-2,tx=0,ty=90-28.,thetabin=1e-1,lam=1,debug=1)
+        print(az.matrix_theta.min())
+        print(az.matrix_phi.min(),az.matrix_phi.max())
 
 if __name__ == '__main__':
     unittest.main()

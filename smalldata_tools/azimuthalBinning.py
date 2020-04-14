@@ -12,7 +12,7 @@ comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 mpiSize = comm.Get_size()
 
-class azimuthalBinning(DetObjectFunc):
+class AzimuthalBinning(DetObjectFunc):
     def __init__(self, **kwargs):
     #new are: ADU/photon, gainImg. darkImg,phiBins
         """ 
@@ -37,7 +37,7 @@ class azimuthalBinning(DetObjectFunc):
         """
         # save parameters for later use
         self._name = kwargs.get('name', 'azav')
-        super(azimuthalBinning, self).__init__(**kwargs)
+        super(AzimuthalBinning, self).__init__(**kwargs)
         self._mask = kwargs.get('userMask', None)
         self._gain_img = kwargs.get('gainImg', None)
         self._dark_img = kwargs.get('darkImg', None)
@@ -46,7 +46,7 @@ class azimuthalBinning(DetObjectFunc):
         self._dis_to_sam = kwargs.get('dis_to_sam', 100e-3)
         self._eBeam =  kwargs.get('eBeam', 9.5)
         self._lam = util.E2lam(self.eBeam) * 1e10
-        self._phi_bins = kwargs.get('phiBins', 1)
+        self._phi_bins = kwargs.get('phiBins', 1)  # list
         self._p_plane = kwargs.get('Pplane', 0)
         self._tx = kwargs.get('tx', 0.)
         self._ty = kwargs.get('ty', 0.)
@@ -120,6 +120,11 @@ class azimuthalBinning(DetObjectFunc):
     def phiBins(self):
         return self._phi_bins
 
+    @phiBins.setter
+    def phiBins(self, phi_bins):
+        if isinstance(phi_bins, np.ndarray):
+
+
     @property
     def Pplane(self):
         return self._p_plane
@@ -169,7 +174,7 @@ class azimuthalBinning(DetObjectFunc):
     def setFromDet(self, det):
         if det.mask and det.cmask:
             if self._mask and self._mask.flatten().shape == det.mask.flatten().shape:
-                self._mask = ~(self._mask.flatten().astype(bool)&det.mask.astype(bool).flatten())
+                self._mask = ~(self._mask.flatten().astype(bool) & det.mask.astype(bool).flatten())
             else:
                 self._mask = ~(det.cmask.astype(bool)&det.mask.astype(bool))
         self._mask = self._mask.flatten()
@@ -180,15 +185,15 @@ class azimuthalBinning(DetObjectFunc):
             self.y = det.y.flatten() / 1e3
 
     def setFromFunc(self, func=None):
-        super(azimuthalBinning, self).setFromFunc()
+        super(AzimuthalBinning, self).setFromFunc()
         if func is None:
             self._setup()
             return
-        print 'set params from func ', func.__dict__.keys()
+        print('set params from func ', func.__dict__.keys())
         if func._x: 
-            self.x = func._x.flatten()/1e3
+            self.x = func._x.flatten() / 1e3
         if func._y: 
-            self.y = func._y.flatten()/1e3
+            self.y = func._y.flatten() / 1e3
         if func._mask and isinstance(func, ROIFunc): 
             self._mask = func._mask.astype(bool).flatten()
         else:
@@ -203,7 +208,8 @@ class azimuthalBinning(DetObjectFunc):
 
         if rank==0:
             if self._mask: 
-                print('initialize azimuthal binning, mask %d pixel for azimuthal integration'%self._mask.sum())
+                print('initialize azimuthal binning, mask %d \
+                    pixel for azimuthal integration' % self._mask.sum())
             else:
                 print('no mask has been passed, will return None')
                 return None
@@ -350,7 +356,7 @@ class azimuthalBinning(DetObjectFunc):
         sys.stdout.flush()
 
     def doAzimuthalAveraging(self, img, applyCorrection=True):
-        if self.darkImg: 
+        if self.darkImg:
             img -= self.darkImg
         if self.gainImg: 
             img /= self.gainImg
@@ -387,18 +393,10 @@ class azimuthalBinning(DetObjectFunc):
 
     def process(self, data):
         data=data.copy()
-        if self.thresADU is not None:
-            data[data<self.thresADU]=0.
-        if self.thresADUhigh is not None:
-            data[data>self.thresADU]=0.
-        if self.thresRms is not None:
-            data[data>self.thresRms*self.rms]=0.
+        if self.thresADU:  # Set pixels below threshold to 0
+            data[data < self.thresADU] = 0.
+        if self.thresADUhigh:  # Set pixels aove high threshold to 0
+            data[data > self.thresADU] = 0.
+        if self.thresRms is not None:  # Set noisy pixels to 0?
+            data[data > self.thresRms * self.rms] = 0.
         return {'azav': self.doCake(data)}
-    
-        
-#make this a real test class w/ assertions.
-def test():
-    mask=np.ones( (2000,2000) )
-    az=azimuthal_averaging(mask,-80,1161,pixelsize=82e-6,d=4.7e-2,tx=0,ty=90-28.,thetabin=1e-1,lam=1,debug=1)
-    print(az.matrix_theta.min())
-    print(az.matrix_phi.min(),az.matrix_phi.max())

@@ -14,7 +14,7 @@ from smalldata_tools.roi_rebin import ROIFunc, spectrumFunc, projectionFunc, spa
 from smalldata_tools.waveformFunc import getCMPeakFunc, templateFitFunc
 from smalldata_tools.droplet import dropletFunc
 from smalldata_tools.photons import photonFunc
-from smalldata_tools.azimuthalBinning import azimuthalBinning
+from smalldata_tools.AzimuthalBinning import AzimuthalBinning
 
 ########################################################## 
 ##
@@ -260,7 +260,7 @@ if haveCspad:
     cspad.azav_eBeam=azIntParams['eBeam']
     if azIntParams.has_key('cspad_center'):
         try:
-            azav = azimuthalBinning(center=azIntParams['cspad_center'], dis_to_sam=azIntParams['cspad_dis_to_sam'], phiBins=11, Pplane=0)
+            azav = AzimuthalBinning(center=azIntParams['cspad_center'], dis_to_sam=azIntParams['cspad_dis_to_sam'], phiBins=11, Pplane=0)
             cspad.addFunc(azav)
         except:
 	        pass
