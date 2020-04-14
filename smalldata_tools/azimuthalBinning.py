@@ -39,34 +39,38 @@ class azimuthalBinning(DetObjectFunc):
         self._name = kwargs.get('name', 'azav')
         super(azimuthalBinning, self).__init__(**kwargs)
         self._mask = kwargs.get('userMask', None)
-        self.gainImg = kwargs.get('gainImg', None)
-        self.darkImg = kwargs.get('darkImg', None)
+        self._gain_img = kwargs.get('gainImg', None)
+        self._dark_img = kwargs.get('darkImg', None)
         self._debug = kwargs.get('debug', False)
-        self.ADU_per_photon = kwargs.get('ADU_per_Photon', 1.)
-        self.dis_to_sam = kwargs.get('dis_to_sam', 100e-3)
-        self.eBeam =  kwargs.get('eBeam', 9.5)
-        self.lam = util.E2lam(self.eBeam) * 1e10
-        self.phiBins = kwargs.get('phiBins', 1)
-        self.Pplane = kwargs.get('Pplane', 0)
-        self.tx = kwargs.get('tx', 0.)
-        self.ty = kwargs.get('ty', 0.)
-        self.qbin = kwargs.get('qbin', 5e-3)
-        self.thresRms =  kwargs.get('thresRms', None)
-        self.thresADU =  kwargs.get('thresADU', None)
-        self.thresADUhigh = kwargs.get('thresADUhigh', None)
-        self.x = kwargs.get('x', None)
-        self.y = kwargs.get('y', None)
+        self._ADU_per_photon = kwargs.get('ADU_per_Photon', 1.)
+        self._dis_to_sam = kwargs.get('dis_to_sam', 100e-3)
+        self._eBeam =  kwargs.get('eBeam', 9.5)
+        self._lam = util.E2lam(self.eBeam) * 1e10
+        self._phi_bins = kwargs.get('phiBins', 1)
+        self._p_plane = kwargs.get('Pplane', 0)
+        self._tx = kwargs.get('tx', 0.)
+        self._ty = kwargs.get('ty', 0.)
+        self._qbin = kwargs.get('qbin', 5e-3)
+        self._thres_RMS =  kwargs.get('thresRms', None)
+        self._thres_ADU =  kwargs.get('thresADU', None)
+        self._thres_ADU_high = kwargs.get('thresADUhigh', None)
+        self._x = kwargs.get('x', None)
+        self._y = kwargs.get('y', None)
 
-        center = kwargs.get('center',None)
+        center = kwargs.get('center', None)
         if center:
-            self.xcen = center[0]/1e3
-            self.ycen = center[1]/1e3 
+            self._xcen = center[0] / 1e3
+            self._ycen = center[1] / 1e3 
         else:
+            self._xcen = None
+            self._ycen = None
             print('no center has been given')
             # return None (__init__ is required to return None)
             
-        if self._mask: 
+        if self._mask:
             self._mask = np.asarray(self._mask, dtype=np.bool)
+
+    ######## Explicitly state property setter/getters #########
 
     @property
     def name(self):
@@ -75,6 +79,14 @@ class azimuthalBinning(DetObjectFunc):
     @property
     def mask(self):
         return self._mask
+
+    @property
+    def gainImg(self):
+        return self._gain_img
+
+    @property
+    def darkImg(self):
+        return self._dark_img
 
     @property
     def debug(self):
@@ -87,6 +99,72 @@ class azimuthalBinning(DetObjectFunc):
             return
 
         self._debug = debug
+
+    @property
+    def ADU_per_Photon(self):
+        return self._ADU_per_photon
+
+    @property
+    def dis_to_sam(self):
+        return self._dis_to_sam
+
+    @property
+    def eBeam(self):
+        return self._eBeam
+
+    @property
+    def lam(self):
+        return self._lam
+
+    @property
+    def phiBins(self):
+        return self._phi_bins
+
+    @property
+    def Pplane(self):
+        reutrn self._p_plane
+
+    @property
+    def tx(self):
+        return self._tx
+
+    @property
+    def ty(self):
+        return self._ty
+
+    @property
+    def qbin(self):
+        return self._qbin
+
+    @property
+    def thresRMS(self):
+        return self._thres_RMS
+
+    @property
+    def thresADU(self):
+        return self._thres_ADU
+
+    @property
+    def thresADUhigh(self):
+        return self._thres_ADU_high
+
+    @property
+    def x(self):
+        reutrn self._x
+    
+    @property
+    def y(self):
+        reutrn self._y
+
+    @property
+    def xcen(self):
+        reutrn self._xcen
+
+    @property
+    def ycen(self):
+        reutrn self._ycen
+
+    ####### Override methods from DetObjectFunc ########
 
     def setFromDet(self, det):
         if det.mask and det.cmask:
@@ -119,6 +197,8 @@ class azimuthalBinning(DetObjectFunc):
         #    self._mask = np.ones_like(func._rms).flatten()
         self._setup()
 
+    ######### Helper Methods #########
+
     def _setup(self):
 
         if rank==0:
@@ -137,8 +217,9 @@ class azimuthalBinning(DetObjectFunc):
         self.ycen = float(self.ycen)
 
         # equations based on J Chem Phys 113, 9140 (2000) [logbook D30580, pag 71]
-        (A,B,C) = (-np.sin(ty)*np.cos(tx),-np.sin(tx),-np.cos(ty)*np.cos(tx))
-        (a,b,c) = (self.xcen+self.dis_to_sam*np.tan(ty),float(self.ycen)-self.dis_to_sam*np.tan(tx),self.dis_to_sam)
+        (A,B,C) = (-np.sin(ty) * np.cos(tx), -np.sin(tx), -np.cos(ty) * np.cos(tx))
+        (a,b,c) = (self.xcen + self.dis_to_sam * np.tan(ty), \
+            float(self.ycen) - self.dis_to_sam*np.tan(tx), self.dis_to_sam)
 
         x = self.x
         y = self.y
@@ -268,21 +349,26 @@ class azimuthalBinning(DetObjectFunc):
                 print(s,)
         sys.stdout.flush()
 
-    def doAzimuthalAveraging(self,img,applyCorrection=True):
-        if self.darkImg is not None: img-=self.darkImg
-        if self.gainImg is not None: img/=self.gainImg
+    def doAzimuthalAveraging(self, img, applyCorrection=True):
+        if self.darkImg: 
+            img -= self.darkImg
+        if self.gainImg: 
+            img /= self.gainImg
         if applyCorrection:
-            I=np.bincount(self.idxq, weights = img.ravel()/self.correction.ravel(), minlength=self.nq); I=I[:self.nq]
+            I=np.bincount(self.idxq, weights = img.ravel() / \
+                self.correction.ravel(), minlength=self.nq); I=I[:self.nq]
         else:
-            I=np.bincount(self.idxq, weights = img.ravel()                        , minlength=self.nq); I=I[:self.nq]
-        self.sig = np.sqrt(1./self.ADU_per_photon)*np.sqrt(I)/self.norm
-        self.I = I/self.norm
+            I = np.bincount(self.idxq, weights = img.ravel() \
+                , minlength=self.nq); I=I[:self.nq]
+        self.sig = np.sqrt(1. / self.ADU_per_photon) * np.sqrt(I) / self.norm
+        self.I = I / self.norm
         return self.I
 
-
-    def doCake(self,img,applyCorrection=True):
-        if self.darkImg is not None: img-=self.darkImg
-        if self.gainImg is not None: img/=self.gainImg
+    def doCake(self, img, applyCorrection=True):
+        if self.darkImg: 
+            img -= self.darkImg
+        if self.gainImg: 
+            img /= self.gainImg
 
         img = img.ravel()[self._mask.ravel()==0]
         #print('img:', img.shape)

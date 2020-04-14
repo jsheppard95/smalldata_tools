@@ -41,14 +41,16 @@ class DetObjectFunc(object):
         self._debug=False
         if '_name' not in kwargs and '_name' not in self.__dict__.keys():
             print('Function needs to have _name as parameter, will return None')
-            return None
+            return None  # Short circuit of init not typical unless raise ValueError or some such
         for key in kwargs:
             self.__dict__[key] = kwargs[key]
+
     def setFromDet(self, det):
         for k, sfunc in self.__dict__.iteritems(): 
             if isinstance(sfunc, DetObjectFunc):
                 print 'DEBUG: call set from det for %s with detector %s: '%(self._name, det._name)
                 sfunc.setFromDet(det) #pass parameters from det (rms, geometry, .....)
+                
     def setFromFunc(self, parentFunc=None):
         for k, sfunc in self.__dict__.iteritems(): 
             if isinstance(sfunc, DetObjectFunc):
