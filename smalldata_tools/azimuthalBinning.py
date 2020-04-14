@@ -38,26 +38,26 @@ class azimuthalBinning(DetObjectFunc):
         # save parameters for later use
         self._name = kwargs.get('name', 'azav')
         super(azimuthalBinning, self).__init__(**kwargs)
-        self._mask = kwargs.get("userMask", None)
-        self.gainImg = kwargs.get("gainImg", None)
-        self.darkImg = kwargs.get("darkImg", None)
-        self._debug = kwargs.get("debug", False)
-        self.ADU_per_photon = kwargs.get("ADU_per_Photon", 1.)
-        self.dis_to_sam = kwargs.get("dis_to_sam", 100e-3)
-        self.eBeam =  kwargs.get("eBeam", 9.5)
+        self._mask = kwargs.get('userMask', None)
+        self.gainImg = kwargs.get('gainImg', None)
+        self.darkImg = kwargs.get('darkImg', None)
+        self._debug = kwargs.get('debug', False)
+        self.ADU_per_photon = kwargs.get('ADU_per_Photon', 1.)
+        self.dis_to_sam = kwargs.get('dis_to_sam', 100e-3)
+        self.eBeam =  kwargs.get('eBeam', 9.5)
         self.lam = util.E2lam(self.eBeam) * 1e10
-        self.phiBins = kwargs.get("phiBins", 1)
-        self.Pplane = kwargs.get("Pplane", 0)
-        self.tx = kwargs.get("tx", 0.)
-        self.ty = kwargs.get("ty", 0.)
-        self.qbin = kwargs.get("qbin", 5e-3)
-        self.thresRms =  kwargs.get("thresRms", None)
-        self.thresADU =  kwargs.get("thresADU", None)
-        self.thresADUhigh = kwargs.get("thresADUhigh", None)
-        self.x = kwargs.get("x", None)
-        self.y = kwargs.get("y", None)
+        self.phiBins = kwargs.get('phiBins', 1)
+        self.Pplane = kwargs.get('Pplane', 0)
+        self.tx = kwargs.get('tx', 0.)
+        self.ty = kwargs.get('ty', 0.)
+        self.qbin = kwargs.get('qbin', 5e-3)
+        self.thresRms =  kwargs.get('thresRms', None)
+        self.thresADU =  kwargs.get('thresADU', None)
+        self.thresADUhigh = kwargs.get('thresADUhigh', None)
+        self.x = kwargs.get('x', None)
+        self.y = kwargs.get('y', None)
 
-        center = kwargs.get("center",None)
+        center = kwargs.get('center',None)
         if center:
             self.xcen = center[0]/1e3
             self.ycen = center[1]/1e3 
@@ -102,7 +102,7 @@ class azimuthalBinning(DetObjectFunc):
             self.y = det.y.flatten() / 1e3
 
     def setFromFunc(self, func=None):
-        super(azimuthalBinning,self).setFromFunc()
+        super(azimuthalBinning, self).setFromFunc()
         if func is None:
             self._setup()
             return
@@ -145,14 +145,14 @@ class azimuthalBinning(DetObjectFunc):
         r = np.sqrt( (x-a)**2+(y-b)**2+c**2)
         self.r = r
         
-        self.msg("calculating theta...",cr=0)
+        self.msg('calculating theta...',cr=0)
         matrix_theta = np.arccos( (A*(x-a)+B*(y-b)-C*c )/r )
         self.matrix_theta = matrix_theta
-        self.msg("...done")
+        self.msg('...done')
 
         if self._debug:
             print('matrix theta: ',self.matrix_theta.shape)
-        self.msg("calculating phi...",cr=0)
+        self.msg('calculating phi...',cr=0)
         matrix_phi = np.arccos( ((A**2+C**2)*(y-b)-A*B*(x-a)+B*C*c )/ \
                 np.sqrt((A**2+C**2)*(r**2-(A*(x-a)+B*(y-b)-C*c)**2)))
         idx = (y>=self.ycen) & (np.isnan(matrix_phi))
@@ -163,18 +163,18 @@ class azimuthalBinning(DetObjectFunc):
         matrix_phi[idx] = (np.pi-matrix_phi[idx])+np.pi
 #        matrix_phi[idx] = temp+n.pi
         self.matrix_phi = matrix_phi
-        self.msg("...done")
+        self.msg('...done')
 
-        self.msg("calculating pol matrix...",cr=0)
+        self.msg('calculating pol matrix...',cr=0)
         Pout = 1-self.Pplane
         pol = Pout*(1-(np.sin(matrix_phi)*np.sin(matrix_theta))**2)+\
                 self.Pplane*(1-(np.cos(matrix_phi)*np.sin(matrix_theta))**2)
 
-        self.msg("... done")
+        self.msg('... done')
         self.pol=pol
         theta_max = np.nanmax(matrix_theta[~self._mask])
 
-        self.msg("calculating digitize")
+        self.msg('calculating digitize')
         if isinstance(self.phiBins, np.ndarray):
             self.phiBins = self.phiBins.tolist()
         if isinstance(self.phiBins, list):
@@ -232,12 +232,12 @@ class azimuthalBinning(DetObjectFunc):
         self.Cake_idxs[self._mask.ravel()] = 0; # send the masked ones in the first bin
 
         #last_idx = self.idxq.max()
-        #print("last index",last_idx)
-        self.msg("...done")
+        #print('last index',last_idx)
+        self.msg('...done')
         # include geometrical corrections
         geom    = (self.dis_to_sam/r) ; # pixels are not perpendicular to scattered beam
         geom *= (self.dis_to_sam/r**2); # scattered radiation is proportional to 1/r^2
-        self.msg("calculating normalization...",cr=0)
+        self.msg('calculating normalization...',cr=0)
         self.geom = geom
         self.geom /= self.geom.max()
         self.correction = self.geom*self.pol
@@ -247,14 +247,14 @@ class azimuthalBinning(DetObjectFunc):
         #self.Cake_Npixel = self.Npixel[:self.nq*self.nphi]
         self.Cake_norm=np.reshape(self.Cake_Npixel,(self.nphi,self.nq));#/self.correction1D
         #self.correction1D    =self.correction1D[:self.nq]/self.Npixel
-        self.header    = "# Parameters for data reduction\n"
-        self.header += "# xcen, ycen = %.2f m %.2f m\n" % (self.xcen,self.ycen)
-        self.header += "# sample det distance = %.4f m\n" % (self.dis_to_sam)
-        self.header += "# wavelength = %.4f Ang\n" % (self.lam)
-        self.header += "# detector angles x,y = %.3f,%.3f deg\n" % (np.rad2deg(tx),np.rad2deg(ty))
-        self.header += "# fraction of inplane pol %.3f\n" % (self.Pplane)
+        self.header    = '# Parameters for data reduction\n'
+        self.header += '# xcen, ycen = %.2f m %.2f m\n' % (self.xcen,self.ycen)
+        self.header += '# sample det distance = %.4f m\n' % (self.dis_to_sam)
+        self.header += '# wavelength = %.4f Ang\n' % (self.lam)
+        self.header += '# detector angles x,y = %.3f,%.3f deg\n' % (np.rad2deg(tx),np.rad2deg(ty))
+        self.header += '# fraction of inplane pol %.3f\n' % (self.Pplane)
         if isinstance(qbin,float):
-            self.header += "# q binning : %.3f Ang-1\n" % (qbin)
+            self.header += '# q binning : %.3f Ang-1\n' % (qbin)
         #remove idx & correction values for masked pixels. Also remove maks pixels from image in process fct
         self.Cake_idxs = self.Cake_idxs[self._mask.ravel()==0]
         self.correction = self.correction.flatten()[self._mask.ravel()==0]
