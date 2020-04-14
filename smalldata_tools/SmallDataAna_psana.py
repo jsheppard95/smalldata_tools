@@ -35,7 +35,7 @@ from smalldata_tools.utilities_plotting import hv_image_ctl
 from smalldata_tools.utilities_plotting import hv_3dimage
 from smalldata_tools.utilities_FitCenter import FindFitCenter
 from smalldata_tools.utilities_FitCenter import fitCircle
-from smalldata_tools.AzimuthalBinning import AzimuthalBinning
+from smalldata_tools.azimuthalBinning import AzimuthalBinning
 from mpi4py import MPI
 import h5py
 comm = MPI.COMM_WORLD

@@ -14,7 +14,7 @@ from smalldata_tools.roi_rebin import ROIFunc, spectrumFunc, projectionFunc, spa
 from smalldata_tools.waveformFunc import getCMPeakFunc, templateFitFunc
 from smalldata_tools.droplet import dropletFunc
 from smalldata_tools.photons import photonFunc
-from smalldata_tools.AzimuthalBinning import AzimuthalBinning
+from smalldata_tools.azimuthalBinning import AzimuthalBinning
 
 ########################################################## 
 ##

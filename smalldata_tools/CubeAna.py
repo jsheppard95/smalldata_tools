@@ -11,7 +11,7 @@ from utilities_plotting import hv_3dimage
 from utilities import E2lam
 from utilities import dictToHdf5
 from utilities import image_from_dxy
-import AzimuthalBinning as ab
+import azimuthalBinning as ab
 import xarray as xr
 from bokeh.io import show
 import holoviews as hv

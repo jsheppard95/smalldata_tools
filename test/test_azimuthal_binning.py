@@ -2,7 +2,7 @@ import unittest
 import smalldata_tools.utilities as util
 import psana
 import numpy as np
-from smalldata_tools.AzimuthalBinning import AzimuthalBinning as ab
+from smalldata_tools.azimuthalBinning import AzimuthalBinning as ab
 
 # Constants
 
